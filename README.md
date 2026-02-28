@@ -14,17 +14,18 @@ Convert copied cPanel DNS data into a Cloudflare-importable TXT zone file.
 - Paste plain copied rows (`Name TTL Type Record`) and parse records
 - Edit records in table
 - Add records with type-specific form fields
-- Filter by record type (`All`, `A`, `CNAME`, `MX`, `SRV`, `TXT`)
+- Filter by record type (`All`, `A`, `AAAA`, `CNAME`, `MX`, `SRV`, `TXT`)
 - Export as domain-named `.txt` file (BIND-style)
+- Step-by-step actions in UI (`Step 1: Load Input` -> `Step 2: Generate TXT` -> `Step 3: Download`)
 
 ## Local usage
 
 1. Open `cpanel-html-to-cloudflare-zone.html` in your browser.
 2. Paste HTML or copied DNS text.
-3. Click `Load From HTML`.
+3. Click `Step 1: Load Input`.
 4. Edit/add records if needed.
-5. Click `Generate TXT`.
-6. Click `Download .txt`.
+5. Click `Step 2: Generate TXT`.
+6. Click `Download .txt` from the Step 3 section.
 
 ## Cloudflare import
 
