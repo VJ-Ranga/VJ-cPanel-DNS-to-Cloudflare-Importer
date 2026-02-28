@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VJ Tools | cPanel DNS to Cloudflare Importer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <p class="eyebrow">VJ Tools</p>
+      <h1>cPanel DNS to Cloudflare Importer</h1>
+      <p class="muted">Paste cPanel DNS HTML or copied table text, edit records in one place, then generate a Cloudflare-ready TXT export.</p>
+    </header>
+
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label for="domain">Domain override (optional)</label>
+          <input id="domain" placeholder="example.com" />
+        </div>
+        <div>
+          <label for="defaultTtl">Default TTL</label>
+          <input id="defaultTtl" value="3600" />
+        </div>
+      </div>
+
+      <label for="input">Paste cPanel HTML or copied record text</label>
+      <textarea id="input" placeholder="Paste full cPanel HTML OR copied rows (Name TTL Type Record)..."></textarea>
+
+      <div class="actions">
+        <button class="primary" id="loadHtml">Load From HTML</button>
+        <button class="primary" id="generate">Generate TXT</button>
+        <button id="copy">Copy Output</button>
+        <button id="download">Download .txt</button>
+        <button id="clear">Clear</button>
+      </div>
+
+      <label>Add record (standard style)</label>
+      <div class="add-card">
+        <div class="add-grid">
+          <div>
+            <label for="addType">Type</label>
+            <select id="addType" class="cell-select">
+              <option value="A">A</option>
+              <option value="AAAA">AAAA</option>
+              <option value="CNAME">CNAME</option>
+              <option value="MX">MX</option>
+              <option value="SRV">SRV</option>
+              <option value="TXT">TXT</option>
+              <option value="CAA">CAA</option>
+            </select>
+          </div>
+          <div>
+            <label for="addName">Name (required)</label>
+            <input id="addName" class="cell-input" placeholder="@ or subdomain" />
+          </div>
+          <div>
+            <label id="mainValueLabel" for="addMainValue">IPv4 address (required)</label>
+            <input id="addMainValue" class="cell-input" placeholder="209.74.67.134" />
+          </div>
+          <div>
+            <label for="addTtl">TTL</label>
+            <select id="addTtl" class="cell-select">
+              <option value="AUTO">Auto</option>
+              <option value="1">1</option>
+              <option value="300">300</option>
+              <option value="3600">3600</option>
+              <option value="14400">14400</option>
+              <option value="86400">86400</option>
+            </select>
+          </div>
+          <div id="proxyContainer">
+            <label for="addProxy">Proxy status</label>
+            <div class="proxy-wrap">
+              <input id="addProxy" type="checkbox" />
+              <span>Proxied</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="extraFields" class="add-grid-2 hidden">
+          <div id="mxPriorityWrap" class="hidden">
+            <label for="mxPriority">MX Priority</label>
+            <input id="mxPriority" class="cell-input" placeholder="10" />
+          </div>
+          <div id="srvPriorityWrap" class="hidden">
+            <label for="srvPriority">SRV Priority</label>
+            <input id="srvPriority" class="cell-input" placeholder="0" />
+          </div>
+          <div id="srvWeightWrap" class="hidden">
+            <label for="srvWeight">SRV Weight</label>
+            <input id="srvWeight" class="cell-input" placeholder="0" />
+          </div>
+          <div id="srvPortWrap" class="hidden">
+            <label for="srvPort">SRV Port</label>
+            <input id="srvPort" class="cell-input" placeholder="443" />
+          </div>
+          <div id="caaFlagWrap" class="hidden">
+            <label for="caaFlag">CAA Flag</label>
+            <input id="caaFlag" class="cell-input" placeholder="0" />
+          </div>
+          <div id="caaTagWrap" class="hidden">
+            <label for="caaTag">CAA Tag</label>
+            <input id="caaTag" class="cell-input" placeholder="issue" />
+          </div>
+        </div>
+
+        <div id="txtContentWrap" class="txt-wrap hidden">
+          <label for="txtContent">TXT Content (required)</label>
+          <textarea id="txtContent" class="cell-input txt-content" placeholder="v=spf1 ..."></textarea>
+        </div>
+
+        <div class="add-help">New records are inserted at the top for easy review.</div>
+        <div class="add-submit-wrap">
+          <button id="addRecordTop" class="primary">Add Record to Top</button>
+        </div>
+      </div>
+
+      <label>Records editor (you can change IP/value and add records)</label>
+      <div class="filters" id="filters">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-btn active" data-filter="ALL">All</button>
+        <button class="filter-btn" data-filter="A">A</button>
+        <button class="filter-btn" data-filter="CNAME">CNAME</button>
+        <button class="filter-btn" data-filter="MX">MX</button>
+        <button class="filter-btn" data-filter="SRV">SRV</button>
+        <button class="filter-btn" data-filter="TXT">TXT</button>
+      </div>
+      <div class="editor-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-name">Name</th>
+              <th class="col-ttl">TTL</th>
+              <th class="col-type">Type</th>
+              <th class="col-value">Record value</th>
+              <th class="col-proxied">Proxied</th>
+              <th class="col-action">Action</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </div>
+
+      <label for="output">Generated zone file</label>
+      <textarea id="output" readonly></textarea>
+
+      <div id="status" class="status"></div>
+    </div>
+
+    <footer class="page-footer">
+      <div>Designed by <a href="https://vjranga.com" target="_blank" rel="noopener">vjranga.com</a></div>
+      <div>Copyright (c) 2026 VJ cPanel DNS to Cloudflare Importer. All rights reserved.</div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
