@@ -323,8 +323,15 @@
       var port = norm(byId("srvPort").value || "443");
       value = p + " " + w + " " + port + " " + toFqdn(mainValue);
     } else if (type === "TXT") {
-      var txt = norm(byId("txtContent").value) || mainValue;
-      value = txt ? txt.split(/\n+/).map(function (part) { return quotedTxt(norm(part)); }).join(" ") : "";
+      var txtRaw = byId("txtContent").value || "";
+      var txtParts = String(txtRaw)
+        .split(/\r?\n+/)
+        .map(function (part) { return norm(part); })
+        .filter(Boolean);
+      if (!txtParts.length && mainValue) {
+        txtParts = [norm(mainValue)];
+      }
+      value = txtParts.length ? txtParts.map(quotedTxt).join(" ") : "";
       proxied = false;
     } else if (type === "CAA") {
       var flag = norm(byId("caaFlag").value || "0");
