@@ -571,9 +571,11 @@
   });
 
   byId("clear").addEventListener("click", function () {
+    byId("domain").value = "";
     byId("input").value = "";
     byId("output").value = "";
     records = [];
+    lastGeneratedDomain = "";
     renderRecords();
     setStatus("Cleared.");
   });
