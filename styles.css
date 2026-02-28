@@ -196,6 +196,21 @@ textarea {
   margin: 16px 0 22px;
 }
 
+.actions-top {
+  margin-top: 12px;
+  margin-bottom: 22px;
+}
+
+.actions-generate {
+  margin-top: 6px;
+  margin-bottom: 14px;
+}
+
+.actions-export {
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
 button {
   border: 1px solid var(--border);
   background: var(--surface-alt);

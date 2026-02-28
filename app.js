@@ -25,6 +25,18 @@
     return parts.slice(-2).join(".");
   }
 
+  function sanitizeDomain(value, fallback) {
+    var clean = norm(value)
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .replace(/^\.+|\.+$/g, "")
+      .replace(/\.\.+/g, ".");
+
+    if (!clean) return fallback || "";
+    if (!/^[a-z0-9.-]+$/.test(clean) || clean.indexOf(".") === -1) return fallback || "";
+    return clean;
+  }
+
   function toFqdn(value) {
     var text = norm(value);
     if (!text) return "";
@@ -89,7 +101,7 @@
       return { domain: "", records: [] };
     }
 
-    var baseDomain = (domainOverride || getBaseDomain(starts[0].name)).replace(/\.$/, "");
+    var baseDomain = sanitizeDomain(domainOverride, getBaseDomain(starts[0].name));
     var parsed = [];
 
     function nonEmpty(list) {
@@ -160,7 +172,7 @@
 
   function parseRecordsFromHtml(rows, domainOverride, defaultTtl) {
     var firstName = norm(rows[0].querySelector('td[data-title="Name"]').textContent);
-    var domain = (domainOverride || getBaseDomain(firstName)).replace(/\.$/, "");
+    var domain = sanitizeDomain(domainOverride, getBaseDomain(firstName));
     var parsed = [];
 
     rows.forEach(function (row) {
@@ -289,7 +301,7 @@
   }
 
   function addRecordFromForm() {
-    var domain = norm(byId("domain").value).replace(/\.$/, "") || lastGeneratedDomain || "example.com";
+    var domain = sanitizeDomain(byId("domain").value, lastGeneratedDomain || "example.com");
     var type = byId("addType").value;
     var name = toAbsoluteName(norm(byId("addName").value || "@"), domain);
     var ttlRaw = byId("addTtl").value;
@@ -359,13 +371,35 @@
   }
 
   function inferCfTag(name, domain) {
-    var clean = name.replace(/\.$/, "");
-    if (clean === domain || clean === "www." + domain) return "true";
-    return "false";
+    var clean = name.replace(/\.$/, "").toLowerCase();
+    var root = (domain || "").replace(/\.$/, "").toLowerCase();
+    if (!root) return "false";
+    if (clean === root || clean === "www." + root) return "true";
+    if (!clean.endsWith("." + root)) return "false";
+
+    var host = clean.slice(0, -(root.length + 1));
+    if (!host || host.indexOf("_") === 0) return "false";
+
+    var firstLabel = host.split(".")[0];
+    var nonProxyHosts = {
+      mail: true,
+      ftp: true,
+      cpanel: true,
+      webmail: true,
+      webdisk: true,
+      whm: true,
+      cpcontacts: true,
+      cpcalendars: true,
+      autodiscover: true,
+      autoconfig: true
+    };
+
+    if (nonProxyHosts[firstLabel]) return "false";
+    return "true";
   }
 
   function buildZone(recordList, domainOverride, defaultTtl) {
-    var domain = (domainOverride || lastGeneratedDomain || "example.com").replace(/\.$/, "");
+    var domain = sanitizeDomain(domainOverride, sanitizeDomain(lastGeneratedDomain, "example.com"));
     var lines = [];
     var byType = {
       A: [],
@@ -405,7 +439,7 @@
       return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
     }
 
-    lines.push(";;;; Domain:     " + domain + ".");
+    lines.push(";; Domain:     " + domain + ".");
     lines.push(";; Exported:   " + nowStamp());
     lines.push(";;");
     lines.push(";; This file is generated from cPanel HTML table data.");
@@ -457,7 +491,7 @@
 
   byId("generate").addEventListener("click", function () {
     syncRecordsFromEditor();
-    var domain = norm(byId("domain").value) || lastGeneratedDomain;
+    var domain = sanitizeDomain(byId("domain").value, lastGeneratedDomain);
     var defaultTtl = /^\d+$/.test(byId("defaultTtl").value) ? byId("defaultTtl").value : "3600";
 
     if (!records.length) {
@@ -474,7 +508,7 @@
 
   byId("loadHtml").addEventListener("click", function () {
     var inputText = byId("input").value;
-    var domain = norm(byId("domain").value);
+    var domain = sanitizeDomain(byId("domain").value, "");
     var defaultTtl = /^\d+$/.test(byId("defaultTtl").value) ? byId("defaultTtl").value : "3600";
     var rows = parseRows(inputText);
     var parsed;
@@ -521,7 +555,7 @@
       setStatus("Nothing to download yet.");
       return;
     }
-    var domain = norm(byId("domain").value) || lastGeneratedDomain || "zone";
+    var domain = sanitizeDomain(byId("domain").value, sanitizeDomain(lastGeneratedDomain, "zone"));
     var safe = domain.replace(/[^A-Za-z0-9._-]/g, "_");
     var blob = new Blob([output], { type: "text/plain;charset=utf-8" });
     var a = document.createElement("a");
@@ -530,7 +564,9 @@
     document.body.appendChild(a);
     a.click();
     a.remove();
-    URL.revokeObjectURL(a.href);
+    setTimeout(function () {
+      URL.revokeObjectURL(a.href);
+    }, 1200);
     setStatus("Downloaded " + safe + ".txt");
   });
 

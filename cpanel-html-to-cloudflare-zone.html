@@ -29,11 +29,8 @@
       <label for="input">Paste cPanel HTML or copied record text</label>
       <textarea id="input" placeholder="Paste full cPanel HTML OR copied rows (Name TTL Type Record)..."></textarea>
 
-      <div class="actions">
-        <button class="primary" id="loadHtml">Load From HTML</button>
-        <button class="primary" id="generate">Generate TXT</button>
-        <button id="copy">Copy Output</button>
-        <button id="download">Download .txt</button>
+      <div class="actions actions-top">
+        <button class="primary" id="loadHtml">Step 1: Load Input</button>
         <button id="clear">Clear</button>
       </div>
 
@@ -123,6 +120,7 @@
         <span class="filter-label">Filter:</span>
         <button class="filter-btn active" data-filter="ALL">All</button>
         <button class="filter-btn" data-filter="A">A</button>
+        <button class="filter-btn" data-filter="AAAA">AAAA</button>
         <button class="filter-btn" data-filter="CNAME">CNAME</button>
         <button class="filter-btn" data-filter="MX">MX</button>
         <button class="filter-btn" data-filter="SRV">SRV</button>
@@ -144,8 +142,17 @@
         </table>
       </div>
 
-      <label for="output">Generated zone file</label>
+      <div class="actions actions-generate">
+        <button class="primary" id="generate">Step 2: Generate TXT</button>
+      </div>
+
+      <label for="output">Step 3: Generated zone file</label>
       <textarea id="output" readonly></textarea>
+
+      <div class="actions actions-export">
+        <button id="copy">Copy Output</button>
+        <button class="primary" id="download">Download .txt</button>
+      </div>
 
       <div id="status" class="status"></div>
     </div>
