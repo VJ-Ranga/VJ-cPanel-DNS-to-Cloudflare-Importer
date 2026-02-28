@@ -2,6 +2,8 @@
 
 Convert copied cPanel DNS data into a Cloudflare-importable TXT zone file.
 
+![Tool Screenshot](./cPanel%20DNS%20to%20Cloudflare%20Importer.png)
+
 ## Files
 
 - `cpanel-html-to-cloudflare-zone.html` - Main page (structure)
