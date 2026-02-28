@@ -6,7 +6,7 @@ Convert copied cPanel DNS data into a Cloudflare-importable TXT zone file.
 
 ## Files
 
-- `cpanel-html-to-cloudflare-zone.html` - Main page (structure)
+- `index.html` - Main page (structure)
 - `styles.css` - Styles (branding/theme)
 - `app.js` - Parser + editor + export logic
 
@@ -22,7 +22,7 @@ Convert copied cPanel DNS data into a Cloudflare-importable TXT zone file.
 
 ## Local usage
 
-1. Open `cpanel-html-to-cloudflare-zone.html` in your browser.
+1. Open `index.html` in your browser.
 2. Paste HTML or copied DNS text.
 3. Click `Step 1: Load Input`.
 4. Edit/add records if needed.
@@ -51,3 +51,8 @@ git push -u origin main
 
 - This is a static client-side tool. No server required.
 - Review generated DNS records before production use.
+
+## Analytics and AdSense
+
+- No automatic analytics/ad loading is included by default.
+- Use the commented `SAFE AD SPOT` block in `index.html` and paste your own ad code manually when needed.
